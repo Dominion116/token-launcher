@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Rocket, Shield, Zap, Users, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import Header from '@/components/Header';
+import Header from '@/components/header';
 import { WalletService, type WalletState } from '@/lib/walletService';
 import { useToast } from '@/hooks/use-toast';
 
