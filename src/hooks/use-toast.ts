@@ -16,7 +16,9 @@ type ToasterToast = ToastProps & {
     title?: React.ReactNode
     description?: React.ReactNode
     action?: ToastActionElement
-}const actionTypes = {
+}
+
+const actionTypes = {
     ADD_TOAST: "ADD_TOAST",
     UPDATE_TOAST: "UPDATE_TOAST",
     DISMISS_TOAST: "DISMISS_TOAST",
@@ -69,7 +71,9 @@ const addToRemoveQueue = (toastId: string) => {
     }, TOAST_REMOVE_DELAY)
 
     toastTimeouts.set(toastId, timeout)
-}export const reducer = (state: State, action: Action): State => {
+}
+
+export const reducer = (state: State, action: Action): State => {
     switch (action.type) {
         case "ADD_TOAST":
             return {
@@ -121,7 +125,9 @@ const addToRemoveQueue = (toastId: string) => {
                 toasts: state.toasts.filter((t) => t.id !== action.toastId),
             }
     }
-}const listeners: Array<(state: State) => void> = []
+}
+
+const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
