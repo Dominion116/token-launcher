@@ -161,7 +161,7 @@ const TokenDetailsPage: React.FC = () => {
                                         </div>
                                         <div> <p className="text-sm text-muted-foreground">Creator</p>
                                             <p className="font-semibold">{formatAddress(token.creator)}</p>
-                                        </极>
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center gap-3">
