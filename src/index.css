@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Converted from OKLCH to HSL - Pink/Magenta Primary Theme */
+    --background: 248 100% 98%;
+    --foreground: 282 7% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 282 7% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 282 7% 16%;
+    --primary: 341 76% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 286 20% 96%;
+    --secondary-foreground: 282 7% 16%;
+    --muted: 286 20% 96%;
+    --muted-foreground: 282 7% 16%;
+    --accent: 171 73% 89%;
+    --accent-foreground: 171 17% 16%;
+    --destructive: 34 77% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 9% 92%;
+    --input: 225 9% 92%;
+    --ring: 341 76% 67%;
+    --chart-1: 341 76% 67%;
+    --chart-2: 299 29% 55%;
+    --chart-3: 209 15% 84%;
+    --chart-4: 171 73% 89%;
+    --chart-5: 101 19% 92%;
+    --sidebar: 286 20% 96%;
+    --sidebar-foreground: 282 7% 16%;
+    --sidebar-primary: 341 76% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 171 73% 89%;
+    --sidebar-accent-foreground: 171 17% 16%;
+    --sidebar-border: 225 9% 92%;
+    --sidebar-ring: 341 76% 67%;
+    --radius: 0.5rem;
+    --shadow-2xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+    --shadow: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+    --shadow-md: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 2px 4px -3px hsl(0 0% 0% / 0.10);
+    --shadow-lg: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 4px 6px -3px hsl(0 0% 0% / 0.10);
+    --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 8px 10px -3px hsl(0 0% 0% / 0.10);
+    --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
+  }
+
+  .dark {
+    --background: 282 7% 16%;
+    --foreground: 248 100% 98%;
+    --card: 281 6% 25%;
+    --card-foreground: 248 100% 98%;
+    --popover: 281 6% 25%;
+    --popover-foreground: 248 100% 98%;
+    --primary: 341 76% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 281 6% 25%;
+    --secondary-foreground: 248 100% 98%;
+    --muted: 281 5% 21%;
+    --muted-foreground: 278 5% 62%;
+    --accent: 171 73% 89%;
+    --accent-foreground: 171 17% 16%;
+    --destructive: 34 77% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 281 8% 33%;
+    --input: 281 8% 33%;
+    --ring: 341 76% 67%;
+    --chart-1: 341 76% 67%;
+    --chart-2: 299 29% 55%;
+    --chart-3: 209 15% 84%;
+    --chart-4: 171 73% 89%;
+    --chart-5: 101 19% 92%;
+    --sidebar: 282 7% 16%;
+    --sidebar-foreground: 248 100% 98%;
+    --sidebar-primary: 341 76% 67%;
+/* Glassmorphism effect */
+}
