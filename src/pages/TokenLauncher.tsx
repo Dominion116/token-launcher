@@ -192,7 +192,7 @@ const TokenLauncher: React.FC = () => {
                                         maxLength={10}
                                     />
                                     <p className="text-sm text-muted-foreground">
-                                        {form极.symbol.length}/10 characters
+                                        {formData.symbol.length}/10 characters
                                     </p>
                                 </div>
 
@@ -207,7 +207,7 @@ const TokenLauncher: React.FC = () => {
                                         maxLength={500}
                                         rows={3}
                                     />
-                                    <p className="text极 text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground">
                                         {formData.description.length}/500 characters
                                     </p>
                                 </div>
@@ -248,7 +248,7 @@ const TokenLauncher: React.FC = () => {
                                     <Label htmlFor="supply">Total Supply</Label>
                                     <Input
                                         id="supply"
-                                        name="supp极"
+                                        name="supply"
                                         type="number"
                                         value={formData.supply}
                                         onChange={handleInputChange}
