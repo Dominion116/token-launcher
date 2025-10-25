@@ -146,7 +146,7 @@ export class WalletService {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     }
 
-    private async initialize() {
+    private initialize() {
         if (!window.ethereum) return;
 
         const handleAccountsChanged = (accounts: string[]) => {
@@ -180,7 +180,7 @@ export class WalletService {
             }
         };
 
-        await checkExistingConnection();
+        checkExistingConnection();
 
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', () => this.checkNetwork());
