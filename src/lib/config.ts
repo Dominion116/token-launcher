@@ -22,7 +22,7 @@ export const CELO_ALFAJORES_CONFIG = {
     atomicUnit: 'wei',
     decimals: 18,
     rpcUrl: 'https://alfajores-forno.celo-testnet.org',
-    explorerUrl: 'https://alfajores.celoscan.io'ß
+    explorerUrl: 'https://alfajores.celoscan.io'
   }
   
   export const TOKEN_LAUNCHER_CONTRACT = {
