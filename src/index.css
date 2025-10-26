@@ -1,85 +1,134 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Load fonts (Outfit + Fira Code) */
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap");
 
+/* ---------- Design tokens (light) ----------
+   IMPORTANT: store *only* HSL components (no hsl(...)) */
+:root {
+  --background: 210 16.6667% 97.6471%;
+  --foreground: 240 41.4634% 8.0392%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 41.4634% 8.0392%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 41.4634% 8.0392%;
+
+  --primary: 312.9412 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 100% 97.0588%;
+  --secondary-foreground: 240 41.4634% 8.0392%;
+
+  --muted: 240 100% 97.0588%;
+  --muted-foreground: 240 41.4634% 8.0392%;
+
+  --accent: 168 100% 50%;
+  --accent-foreground: 240 41.4634% 8.0392%;
+
+  --destructive: 14.3529 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 198 18.5185% 89.4118%;
+  --input: 198 18.5185% 89.4118%;
+  --ring: 312.9412 100% 50%;
+
+  --chart-1: 312.9412 100% 50%;
+  --chart-2: 273.8824 100% 50%;
+  --chart-3: 186.1176 100% 50%;
+  --chart-4: 168 100% 50%;
+  --chart-5: 54.1176 100% 50%;
+
+  --sidebar: 240 100% 97.0588%;
+  --sidebar-foreground: 240 41.4634% 8.0392%;
+  --sidebar-primary: 312.9412 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 168 100% 50%;
+  --sidebar-accent-foreground: 240 41.4634% 8.0392%;
+  --sidebar-border: 198 18.5185% 89.4118%;
+  --sidebar-ring: 312.9412 100% 50%;
+
+  --font-sans: Outfit, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --radius: 0.5rem;
+
+  --shadow-2xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+  --shadow: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+  --shadow-md: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 2px 4px -3px hsl(0 0% 0% / 0.10);
+  --shadow-lg: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 4px 6px -3px hsl(0 0% 0% / 0.10);
+  --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 8px 10px -3px hsl(0 0% 0% / 0.10);
+  --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
+}
+
+/* ---------- Design tokens (dark) ---------- */
+.dark {
+  --background: 240 41.4634% 8.0392%;
+  --foreground: 217.5 26.6667% 94.1176%;
+
+  --card: 240 35.4839% 18.2353%;
+  --card-foreground: 217.5 26.6667% 94.1176%;
+
+  --popover: 240 35.4839% 18.2353%;
+  --popover-foreground: 217.5 26.6667% 94.1176%;
+
+  --primary: 312.9412 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 35.4839% 18.2353%;
+  --secondary-foreground: 217.5 26.6667% 94.1176%;
+
+  --muted: 240 39.1304% 13.5294%;
+  --muted-foreground: 232.1053 17.5926% 57.6471%;
+
+  --accent: 168 100% 50%;
+  --accent-foreground: 240 41.4634% 8.0392%;
+
+  --destructive: 14.3529 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 240 34.2857% 27.4510%;
+  --input: 240 34.2857% 27.4510%;
+  --ring: 312.9412 100% 50%;
+
+  --chart-1: 312.9412 100% 50%;
+  --chart-2: 273.8824 100% 50%;
+  --chart-3: 186.1176 100% 50%;
+  --chart-4: 168 100% 50%;
+  --chart-5: 54.1176 100% 50%;
+
+  --sidebar: 240 41.4634% 8.0392%;
+  --sidebar-foreground: 217.5 26.6667% 94.1176%;
+  --sidebar-primary: 312.9412 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 168 100% 50%;
+  --sidebar-accent-foreground: 240 41.4634% 8.0392%;
+  --sidebar-border: 240 34.2857% 27.4510%;
+  --sidebar-ring: 312.9412 100% 50%;
+}
+
+/* Apply tokens app-wide */
 @layer base {
   :root {
-    /* Converted from OKLCH to HSL - Pink/Magenta Primary Theme */
-    --background: 248 100% 98%;
-    --foreground: 282 7% 16%;
-    --card: 0 0% 100%;
-    --card-foreground: 282 7% 16%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 282 7% 16%;
-    --primary: 341 76% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 286 20% 96%;
-    --secondary-foreground: 282 7% 16%;
-    --muted: 286 20% 96%;
-    --muted-foreground: 282 7% 16%;
-    --accent: 171 73% 89%;
-    --accent-foreground: 171 17% 16%;
-    --destructive: 34 77% 65%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 225 9% 92%;
-    --input: 225 9% 92%;
-    --ring: 341 76% 67%;
-    --chart-1: 341 76% 67%;
-    --chart-2: 299 29% 55%;
-    --chart-3: 209 15% 84%;
-    --chart-4: 171 73% 89%;
-    --chart-5: 101 19% 92%;
-    --sidebar: 286 20% 96%;
-    --sidebar-foreground: 282 7% 16%;
-    --sidebar-primary: 341 76% 67%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 171 73% 89%;
-    --sidebar-accent-foreground: 171 17% 16%;
-    --sidebar-border: 225 9% 92%;
-    --sidebar-ring: 341 76% 67%;
     --radius: 0.5rem;
-    --shadow-2xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
-    --shadow: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
-    --shadow-md: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 2px 4px -3px hsl(0 0% 0% / 0.10);
-    --shadow-lg: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 4px 6px -3px hsl(0 0% 0% / 0.10);
-    --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 8px 10px -3px hsl(0 0% 0% / 0.10);
-    --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
+    color-scheme: light;
   }
+  .dark { color-scheme: dark; }
 
-  .dark {
-    --background: 282 7% 16%;
-    --foreground: 248 100% 98%;
-    --card: 281 6% 25%;
-    --card-foreground: 248 100% 98%;
-    --popover: 281 6% 25%;
-    --popover-foreground: 248 100% 98%;
-    --primary: 341 76% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 281 6% 25%;
-    --secondary-foreground: 248 100% 98%;
-    --muted: 281 5% 21%;
-    --muted-foreground: 278 5% 62%;
-    --accent: 171 73% 89%;
-    --accent-foreground: 171 17% 16%;
-    --destructive: 34 77% 65%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 281 8% 33%;
-    --input: 281 8% 33%;
-    --ring: 341 76% 67%;
-    --chart-1: 341 76% 67%;
-    --chart-2: 299 29% 55%;
-    --chart-3: 209 15% 84%;
-    --chart-4: 171 73% 89%;
-    --chart-5: 101 19% 92%;
-    --sidebar: 282 7% 16%;
-    --sidebar-foreground: 248 100% 98%;
-    --sidebar-primary: 341 76% 67%;
-/* Glassmorphism effect */
-}
+  * { @apply border-border; }
+
+  html { font-family: var(--font-sans); }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
