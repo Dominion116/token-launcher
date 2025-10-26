@@ -116,7 +116,9 @@ export function formatTokenAmount(amount: string | number, precision: number = 1
     } catch (err) {
         return '0';
     }
-} export const scientificToDecimal = (num: string | number): string => {
+} 
+
+export const scientificToDecimal = (num: string | number): string => {
     const numStr = typeof num === 'number' ? num.toString() : num;
     if (!/e/i.test(numStr)) {
         return numStr;

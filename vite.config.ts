@@ -1,7 +1,13 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+const isWorkstations =
+  process.env.CLOUD_WORKSTATIONS === '1' ||
+  // fallback detection when env isn’t set (works for workstations web preview)
+  (process.env.HOSTNAME?.includes('cloudworkstations') ?? false)
 
 export default defineConfig({
   plugins: [
@@ -19,17 +25,19 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: true,          // listen on 0.0.0.0
+    host: true,
     port: 5173,
     strictPort: true,
-    hmr: {
-      clientPort: 443,   // HMR over the proxy’s TLS port
-      // protocol: 'wss', // uncomment if HMR still fails
-      // host: '<your-*.cloudworkstations.dev host>', // rarely needed
-    },
+    hmr: isWorkstations
+      ? {
+          clientPort: 443,
+          protocol: 'wss',
+          // host: '<your-*.cloudworkstations.dev host>' // only if needed there
+        }
+      : undefined, // <-- on localhost, use normal HMR (no 443)
   },
   preview: {
     host: true,
     port: 5173,
   },
-});
+})

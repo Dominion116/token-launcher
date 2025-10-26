@@ -85,7 +85,7 @@ const App = () => {
             <TokenLauncher />
           </>
         } />
-        <Route path="/token/:id" element={
+        <Route path="/token/:address" element={
           <>
             <Header
               walletService={walletServiceRef.current}
