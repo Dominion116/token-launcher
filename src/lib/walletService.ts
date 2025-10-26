@@ -135,7 +135,7 @@ export class WalletService {
       await ethereum?.request?.({
         method: 'wallet_revokePermissions',
         params: [{ eth_accounts: {} }],
-      }).catch(() => {});
+      }).catch(() => { });
     } catch (error) {
       console.log('Failed to revoke permissions:', error);
     }
@@ -171,15 +171,52 @@ export class WalletService {
       }
     };
 
-    try { ethereum.on?.('accountsChanged', this.onAccountsChanged); } catch {}
-    try { ethereum.on?.('chainChanged', this.onChainChanged); } catch {}
+    try { ethereum.on?.('accountsChanged', this.onAccountsChanged); } catch { }
+    try { ethereum.on?.('chainChanged', this.onChainChanged); } catch { }
 
     checkExistingConnection();
   }
 
+  async switchToCurrentNetwork() {
+    const ethereum = getEthereum();
+    if (!ethereum?.request) {
+      this.showToast('Error', 'No wallet provider found');
+      return;
+    }
+
+    const cfg = getNetworkConfig();
+    const chainIdHex = '0x' + cfg.chainId.toString(16);
+
+    try {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: chainIdHex }],
+      });
+    } catch (e: any) {
+      if (e?.code === 4902) {
+        // Chain not added — add it
+        await ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: chainIdHex,
+            chainName: cfg.name,
+            nativeCurrency: { name: cfg.ticker, symbol: cfg.ticker, decimals: cfg.decimals },
+            rpcUrls: [cfg.rpcUrl],
+            blockExplorerUrls: [cfg.explorerUrl],
+          }],
+        });
+      } else {
+        this.showToast('Error', e?.message || 'Failed to switch network');
+        return;
+      }
+    }
+    await this.checkNetwork();
+  }
+
   destroy() {
     const ethereum = getEthereum();
-    try { ethereum?.removeListener?.('accountsChanged', this.onAccountsChanged); } catch {}
-    try { ethereum?.removeListener?.('chainChanged', this.onChainChanged); } catch {}
+    try { ethereum?.removeListener?.('accountsChanged', this.onAccountsChanged); } catch { }
+    try { ethereum?.removeListener?.('chainChanged', this.onChainChanged); } catch { }
   }
 }
+
