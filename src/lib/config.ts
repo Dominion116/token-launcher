@@ -1,5 +1,6 @@
-// import { ethers } from 'ethers';
+// src/lib/config.ts
 
+// --- Networks ---
 export const CHAIN_IDS = {
   celoMainnet: 42220,
   celoAlfajores: 44787, // Alfajores Testnet
@@ -26,10 +27,13 @@ export const CELO_ALFAJORES_CONFIG = {
 };
 
 export type NetworkConfig = typeof CELO_ALFAJORES_CONFIG;
-
 export const getNetworkConfig = (): NetworkConfig => CELO_ALFAJORES_CONFIG;
 
-// ===== Contract (address + minimal ABI your app needs) =====
+// ✅ Set this to the block your factory was deployed on (0 works but scans more)
+// Replace 0 with the actual deploy block for faster loads when you know it.
+export const FACTORY_DEPLOY_BLOCK = 0;
+
+// --- Token Launcher Factory (address + minimal ABI your app needs) ---
 export const TOKEN_LAUNCHER_CONTRACT = {
   address: '0x4F567CF2FA9Ce940f486457a290bEF2A5528ee18',
   abi: [
@@ -40,6 +44,15 @@ export const TOKEN_LAUNCHER_CONTRACT = {
       type: 'constructor',
     },
     // events
+    {
+      anonymous: false,
+      inputs: [
+        { indexed: true, internalType: 'address', name: 'tokenAddress', type: 'address' },
+        { indexed: true, internalType: 'address', name: 'creator', type: 'address' },
+      ],
+      name: 'TokenLaunched',
+      type: 'event',
+    },
     {
       anonymous: false,
       inputs: [
@@ -56,15 +69,6 @@ export const TOKEN_LAUNCHER_CONTRACT = {
         { indexed: false, internalType: 'uint256', name: 'newFee', type: 'uint256' },
       ],
       name: 'LaunchFeeUpdated',
-      type: 'event',
-    },
-    {
-      anonymous: false,
-      inputs: [
-        { indexed: true, internalType: 'address', name: 'tokenAddress', type: 'address' },
-        { indexed: true, internalType: 'address', name: 'creator', type: 'address' },
-      ],
-      name: 'TokenLaunched',
       type: 'event',
     },
     // views
