@@ -1,6 +1,5 @@
 // src/lib/config.ts
 
-// --- Networks ---
 export const CHAIN_IDS = {
   celoMainnet: 42220,
   celoAlfajores: 44787, // Alfajores Testnet
@@ -29,11 +28,16 @@ export const CELO_ALFAJORES_CONFIG = {
 export type NetworkConfig = typeof CELO_ALFAJORES_CONFIG;
 export const getNetworkConfig = (): NetworkConfig => CELO_ALFAJORES_CONFIG;
 
-// ✅ Set this to the block your factory was deployed on (0 works but scans more)
-// Replace 0 with the actual deploy block for faster loads when you know it.
+/**
+ * ✅ Set this to the block your factory was deployed at.
+ *    0 works but scans a lot of history. If you know the deploy block, put it here.
+ */
 export const FACTORY_DEPLOY_BLOCK = 0;
 
-// --- Token Launcher Factory (address + minimal ABI your app needs) ---
+/**
+ * ===== Token Launcher Factory (address + ABI your app needs) =====
+ * ⚠️ Ensure this address is the SAME factory you used to launch tokens.
+ */
 export const TOKEN_LAUNCHER_CONTRACT = {
   address: '0x4F567CF2FA9Ce940f486457a290bEF2A5528ee18',
   abi: [
@@ -53,25 +57,37 @@ export const TOKEN_LAUNCHER_CONTRACT = {
       name: 'TokenLaunched',
       type: 'event',
     },
+
+    // --- views used by the app ---
+
+    // Optional array getter (many factories expose this)
     {
-      anonymous: false,
-      inputs: [
-        { indexed: true, internalType: 'address', name: 'owner', type: 'address' },
-        { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
+      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      name: 'launchedTokens',
+      outputs: [
+        { internalType: 'address', name: 'tokenAddress', type: 'address' },
+        { internalType: 'address', name: 'creator', type: 'address' },
+        { internalType: 'string', name: 'name', type: 'string' },
+        { internalType: 'string', name: 'symbol', type: 'string' },
+        { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+        { internalType: 'uint8', name: 'decimals', type: 'uint8' },
+        { internalType: 'string', name: 'metadataURI', type: 'string' },
+        { internalType: 'uint256', name: 'launchTimestamp', type: 'uint256' },
       ],
-      name: 'FeesWithdrawn',
-      type: 'event',
+      stateMutability: 'view',
+      type: 'function',
     },
+
+    // Count of launched tokens
     {
-      anonymous: false,
-      inputs: [
-        { indexed: false, internalType: 'uint256', name: 'oldFee', type: 'uint256' },
-        { indexed: false, internalType: 'uint256', name: 'newFee', type: 'uint256' },
-      ],
-      name: 'LaunchFeeUpdated',
-      type: 'event',
+      inputs: [],
+      name: 'getTotalLaunchedTokens',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
     },
-    // views
+
+    // Single-token info by address
     {
       inputs: [{ internalType: 'address', name: 'tokenAddress', type: 'address' }],
       name: 'getTokenInfo',
@@ -95,17 +111,12 @@ export const TOKEN_LAUNCHER_CONTRACT = {
       stateMutability: 'view',
       type: 'function',
     },
+
+    // misc used elsewhere
     {
       inputs: [{ internalType: 'address', name: 'creator', type: 'address' }],
       name: 'getTokensByCreator',
       outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'getTotalLaunchedTokens',
-      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       stateMutability: 'view',
       type: 'function',
     },

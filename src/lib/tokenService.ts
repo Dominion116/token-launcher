@@ -8,8 +8,8 @@ import {
 
 // One provider per configured chain
 export const providers: Record<number, ethers.providers.JsonRpcProvider> = {};
-const currentCfg = getNetworkConfig();
-providers[currentCfg.chainId] = new ethers.providers.JsonRpcProvider(currentCfg.rpcUrl);
+const cfg = getNetworkConfig();
+providers[cfg.chainId] = new ethers.providers.JsonRpcProvider(cfg.rpcUrl);
 
 // Types
 export interface TokenInfo {
@@ -24,16 +24,58 @@ export interface TokenInfo {
 }
 
 /**
- * Fetch all tokens launched by THIS factory.
- * We scan the TokenLaunched events and then call getTokenInfo() for each token.
+ * Primary path: iterate the on-chain array (if present).
+ * Fallback: scan TokenLaunched events and call getTokenInfo(token) for each.
  */
 export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
-  try {
-    const cfg = getNetworkConfig();
-    const provider = providers[cfg.chainId];
-    if (!provider) throw new Error('Provider not initialized');
+  const provider = providers[getNetworkConfig().chainId];
+  if (!provider) {
+    console.error('[tokens] provider not initialized for chain', getNetworkConfig().chainId);
+    return [];
+  }
 
-    // Interface & topic for TokenLaunched(address tokenAddress, address creator)
+  const factory = new ethers.Contract(
+    TOKEN_LAUNCHER_CONTRACT.address,
+    TOKEN_LAUNCHER_CONTRACT.abi,
+    provider
+  );
+
+  // 1) Try array + count
+  try {
+    const totalBn: ethers.BigNumber = await factory.getTotalLaunchedTokens();
+    const total = totalBn.toNumber();
+    console.info('[tokens] getTotalLaunchedTokens =>', total);
+
+    if (total > 0) {
+      const results: TokenInfo[] = [];
+      for (let i = 0; i < total; i++) {
+        try {
+          const t = await factory.launchedTokens(i);
+          results.push({
+            tokenAddress: t.tokenAddress,
+            creator: t.creator,
+            name: t.name,
+            symbol: t.symbol,
+            totalSupply: t.totalSupply.toString(),
+            decimals: Number(t.decimals),
+            metadataURI: t.metadataURI,
+            launchTimestamp: Number(t.launchTimestamp.toString()) * 1000,
+          });
+        } catch (err) {
+          console.warn(`[tokens] launchedTokens(${i}) failed`, err);
+        }
+      }
+      if (results.length) {
+        results.sort((a, b) => b.launchTimestamp - a.launchTimestamp);
+        return results;
+      }
+    }
+  } catch (err) {
+    console.info('[tokens] Array path unavailable, falling back to event scan:', err?.toString?.() ?? err);
+  }
+
+  // 2) Fallback: scan TokenLaunched events
+  try {
     const iface = new ethers.utils.Interface(TOKEN_LAUNCHER_CONTRACT.abi as any);
     const topic = iface.getEventTopic('TokenLaunched');
 
@@ -44,9 +86,8 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
       topics: [topic],
     });
 
-    if (!logs.length) return [];
+    console.info('[tokens] event scan logs found:', logs.length, 'fromBlock:', FACTORY_DEPLOY_BLOCK);
 
-    // Unique token addresses from logs
     const tokenAddrs = Array.from(
       new Set(
         logs.map((log) => {
@@ -56,47 +97,32 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
       )
     );
 
-    // Fetch token infos in small batches
     const out: TokenInfo[] = [];
-    const BATCH = 5;
-    for (let i = 0; i < tokenAddrs.length; i += BATCH) {
-      const chunk = tokenAddrs.slice(i, i + BATCH);
-      const infos = await Promise.all(
-        chunk.map(async (addr) => {
-          try {
-            const info = await getTokenInfo(addr);
-            return info;
-          } catch (e) {
-            console.error('getTokenInfo failed for', addr, e);
-            return null;
-          }
-        })
-      );
-      for (const ti of infos) if (ti) out.push(ti);
+    for (const addr of tokenAddrs) {
+      const ti = await getTokenInfo(addr);
+      if (ti) out.push(ti);
     }
 
-    // Newest first
-    return out.sort((a, b) => b.launchTimestamp - a.launchTimestamp);
+    out.sort((a, b) => b.launchTimestamp - a.launchTimestamp);
+    return out;
   } catch (err) {
-    console.error('Error fetching launched tokens:', err);
+    console.error('[tokens] event scan failed:', err);
     return [];
   }
 }
 
-/** Fetch a single token’s info via factory view */
 export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | null> {
   try {
-    const cfg = getNetworkConfig();
-    const provider = providers[cfg.chainId];
+    const provider = providers[getNetworkConfig().chainId];
     if (!provider) throw new Error('Provider not initialized');
 
-    const contract = new ethers.Contract(
+    const factory = new ethers.Contract(
       TOKEN_LAUNCHER_CONTRACT.address,
       TOKEN_LAUNCHER_CONTRACT.abi,
       provider
     );
 
-    const info = await contract.getTokenInfo(tokenAddress);
+    const info = await factory.getTokenInfo(tokenAddress);
     return {
       tokenAddress: info.tokenAddress,
       creator: info.creator,
@@ -108,12 +134,12 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
       launchTimestamp: Number(info.launchTimestamp.toString()) * 1000,
     };
   } catch (err) {
-    console.error('Error fetching token info:', err);
+    console.error('[tokens] getTokenInfo failed:', err);
     return null;
   }
 }
 
-// ---- Helpers below (unchanged APIs) ----
+// ---- helpers (unchanged) ----
 export function formatTokenAmount(amount: string | number, precision = 18): string {
   if (typeof amount !== 'number' && typeof amount !== 'string') return '0';
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -126,9 +152,7 @@ export function formatTokenAmount(amount: string | number, precision = 18): stri
       if (precision === undefined || Number.isNaN(precision)) {
         return (Math.floor(num * 1e18) / 1e18).toFixed(18).replace(/\.?0+$/, '');
       }
-      return (Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision)).toFixed(
-        precision
-      );
+      return (Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision)).toFixed(precision);
     }
     return s;
   } catch {
@@ -149,8 +173,8 @@ export const scientificToDecimal = (num: string | number): string => {
 
 export const getCeloBalance = async (walletAddress: string, chainId?: number): Promise<string> => {
   try {
-    const cfg = getNetworkConfig();
-    const target = chainId || cfg.chainId;
+    const current = getNetworkConfig();
+    const target = chainId || current.chainId;
     const provider = providers[target];
     if (!provider) return '0';
     if (!isValidAddress(walletAddress)) return '0';
@@ -177,4 +201,11 @@ export default {
   scientificToDecimal,
   getAllLaunchedTokens,
   getTokenInfo,
+};
+
+// Tiny debug helper (you can run window.debugFetchTokens() in the console)
+;(window as any).debugFetchTokens = async () => {
+  const list = await getAllLaunchedTokens();
+  console.log('debugFetchTokens =>', list);
+  return list;
 };
