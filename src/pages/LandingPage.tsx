@@ -216,7 +216,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
                                 <span className="font-bold">TokenLaunch</span>
                             </div>
                             <p className="text-muted-foreground text-sm">
-                                © 2024 TokenLaunch. All rights reserved.
+                                © 2025 TokenLaunch. All rights reserved.
                             </p>
                         </div>
                         <div className="flex space-x-6">
