@@ -27,7 +27,7 @@ export const CELO_ALFAJORES_CONFIG = {
 
 export type NetworkConfig = typeof CELO_ALFAJORES_CONFIG;
 export const getNetworkConfig = (): NetworkConfig => CELO_ALFAJORES_CONFIG;
-
+ 
 /**
  * ✅ Set this to the block your factory was deployed at.
  *    0 works but scans a lot of history. If you know the deploy block, put it here.
