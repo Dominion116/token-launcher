@@ -25,6 +25,16 @@ export const CELO_ALFAJORES_CONFIG = {
   explorerUrl: BLOCK_EXPLORERS[CHAIN_IDS.celoAlfajores],
 };
 
+export const CELO_MAINNET_CONFIG = {
+  chainId: CHAIN_IDS.celoMainnet,
+  name: 'Celo Mainnet',
+  ticker: 'CELO',
+  atomicUnit: 'wei',
+  decimals: 18,
+  rpcUrl: RPC_URLS[CHAIN_IDS.celoAlfajores],
+  explorerUrl: BLOCK_EXPLORERS[CHAIN_IDS.celoMainnet],
+}
+
 export type NetworkConfig = typeof CELO_ALFAJORES_CONFIG;
 export const getNetworkConfig = (): NetworkConfig => CELO_ALFAJORES_CONFIG;
  
