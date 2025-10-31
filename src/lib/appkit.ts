@@ -6,7 +6,7 @@ import { networks } from './chains'
 export const queryClient = new QueryClient()
 
 
-export const projectId = 'YOUR_REOWN_PROJECT_ID'
+export const projectId = '4741971fec7010fbb715c5a93b6043b0'
 
 
 export const wagmiAdapter = new WagmiAdapter({

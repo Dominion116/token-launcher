@@ -27,4 +27,4 @@ export const celoAlfajores: Chain = {
   testnet: true,
 }
 
-export const networks = [celoMainnet, celoAlfajores]
+export const networks = [celoMainnet, celoAlfajores] as const
