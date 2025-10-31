@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { WalletService, type WalletState } from '@/lib/walletService';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import LandingPage from '@/pages/LandingPage';
