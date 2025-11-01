@@ -75,9 +75,10 @@ const TokenLauncher: React.FC = () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
+      const networkConfig = getNetworkConfig(true);
       const contract = new ethers.Contract(
-        TOKEN_LAUNCHER_CONTRACT.address,
-        TOKEN_LAUNCHER_CONTRACT.abi,
+        TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address, // Access address based on current network
+        TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,    // Access ABI based on current network
         signer
       );
 

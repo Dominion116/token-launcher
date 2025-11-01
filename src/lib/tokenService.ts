@@ -28,10 +28,10 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
     console.error('[tokens] provider not initialized for chain', getNetworkConfig(true).chainId);
     return [];
   }
-
+  const networkConfig = getNetworkConfig(true);
   const factory = new ethers.Contract(
-    TOKEN_LAUNCHER_CONTRACT.address,
-    TOKEN_LAUNCHER_CONTRACT.abi,
+    TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
+    TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,
     provider
   );
 
@@ -75,7 +75,7 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
     const topic = iface.getEventTopic('TokenLaunched');
 
     const logs = await provider.getLogs({
-      address: TOKEN_LAUNCHER_CONTRACT.address,
+      address: TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
       fromBlock: FACTORY_DEPLOY_BLOCK ?? 0,
       toBlock: 'latest',
       topics: [topic],
@@ -111,9 +111,10 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
     const provider = providers[getNetworkConfig(true).chainId];
     if (!provider) throw new Error('Provider not initialized');
 
+    const networkConfig = getNetworkConfig(true);
     const factory = new ethers.Contract(
-      TOKEN_LAUNCHER_CONTRACT.address,
-      TOKEN_LAUNCHER_CONTRACT.abi,
+      TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
+      TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,
       provider
     );
 
