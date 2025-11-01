@@ -18,7 +18,7 @@ export const BLOCK_EXPLORERS: Record<number, string> = {
 // General NetworkConfig type that allows any chainId
 export type NetworkConfig = {
   chainId: number;
-  name: string;
+  name: 'celoMainnet' | 'celoAlfajores'; // Fix: Use consistent keys
   ticker: string;
   atomicUnit: string;
   decimals: number;
@@ -28,7 +28,7 @@ export type NetworkConfig = {
 
 export const CELO_ALFAJORES_CONFIG: NetworkConfig = {
   chainId: CHAIN_IDS.celoAlfajores,
-  name: 'Celo Alfajores',
+  name: 'celoAlfajores', // Fix: Use consistent key
   ticker: 'CELO',
   atomicUnit: 'wei',
   decimals: 18,
@@ -38,7 +38,7 @@ export const CELO_ALFAJORES_CONFIG: NetworkConfig = {
 
 export const CELO_MAINNET_CONFIG: NetworkConfig = {
   chainId: CHAIN_IDS.celoMainnet,
-  name: 'Celo Mainnet',
+  name: 'celoMainnet', // Fix: Use consistent key
   ticker: 'CELO',
   atomicUnit: 'wei',
   decimals: 18,
@@ -48,6 +48,13 @@ export const CELO_MAINNET_CONFIG: NetworkConfig = {
 
 export const getNetworkConfig = (isMainnet: boolean): NetworkConfig => 
   isMainnet ? CELO_MAINNET_CONFIG : CELO_ALFAJORES_CONFIG;
+
+// Fix: Add function to get config by chainId
+export const getNetworkConfigByChainId = (chainId: number): NetworkConfig | null => {
+  if (chainId === CHAIN_IDS.celoMainnet) return CELO_MAINNET_CONFIG;
+  if (chainId === CHAIN_IDS.celoAlfajores) return CELO_ALFAJORES_CONFIG;
+  return null;
+};
 
 export const FACTORY_DEPLOY_BLOCK = 0;
 
