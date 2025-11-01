@@ -1,4 +1,3 @@
-// src/lib/tokenService.ts
 import { ethers } from 'ethers';
 import {
   getNetworkConfig,
@@ -8,7 +7,7 @@ import {
 
 // One provider per configured chain
 export const providers: Record<number, ethers.providers.JsonRpcProvider> = {};
-const cfg = getNetworkConfig();
+const cfg = getNetworkConfig(true); // Ensure it's fetching the correct network configuration
 providers[cfg.chainId] = new ethers.providers.JsonRpcProvider(cfg.rpcUrl);
 
 // Types
@@ -23,14 +22,10 @@ export interface TokenInfo {
   launchTimestamp: number; // ms
 }
 
-/**
- * Primary path: iterate the on-chain array (if present).
- * Fallback: scan TokenLaunched events and call getTokenInfo(token) for each.
- */
 export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
-  const provider = providers[getNetworkConfig().chainId];
+  const provider = providers[getNetworkConfig(true).chainId];
   if (!provider) {
-    console.error('[tokens] provider not initialized for chain', getNetworkConfig().chainId);
+    console.error('[tokens] provider not initialized for chain', getNetworkConfig(true).chainId);
     return [];
   }
 
@@ -113,7 +108,7 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
 
 export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | null> {
   try {
-    const provider = providers[getNetworkConfig().chainId];
+    const provider = providers[getNetworkConfig(true).chainId];
     if (!provider) throw new Error('Provider not initialized');
 
     const factory = new ethers.Contract(
@@ -138,74 +133,3 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
     return null;
   }
 }
-
-// ---- helpers (unchanged) ----
-export function formatTokenAmount(amount: string | number, precision = 18): string {
-  if (typeof amount !== 'number' && typeof amount !== 'string') return '0';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (Number.isNaN(num)) return '0';
-  try {
-    const s = num.toString();
-    if (!s.includes('.')) return s;
-    const decimals = s.split('.')?.[1]?.length || 0;
-    if (decimals > precision) {
-      if (precision === undefined || Number.isNaN(precision)) {
-        return (Math.floor(num * 1e18) / 1e18).toFixed(18).replace(/\.?0+$/, '');
-      }
-      return (Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision)).toFixed(precision);
-    }
-    return s;
-  } catch {
-    return '0';
-  }
-}
-
-export const scientificToDecimal = (num: string | number): string => {
-  const s = typeof num === 'number' ? num.toString() : num;
-  if (!/e/i.test(s)) return s;
-  const [base, exponent] = s.split(/e/i);
-  if (exponent) {
-    const e = parseInt(exponent, 10);
-    if (e < 0) return '0.' + '0'.repeat(Math.abs(e) - 1) + base.replace('.', '');
-  }
-  return s;
-};
-
-export const getCeloBalance = async (walletAddress: string, chainId?: number): Promise<string> => {
-  try {
-    const current = getNetworkConfig();
-    const target = chainId || current.chainId;
-    const provider = providers[target];
-    if (!provider) return '0';
-    if (!isValidAddress(walletAddress)) return '0';
-    const balance = await provider.getBalance(walletAddress);
-    return ethers.utils.formatEther(balance);
-  } catch {
-    return '0';
-  }
-};
-
-export const isValidAddress = (address: string): boolean => {
-  try {
-    return ethers.utils.isAddress(address);
-  } catch {
-    return false;
-  }
-};
-
-export default {
-  providers,
-  isValidAddress,
-  getCeloBalance,
-  formatTokenAmount,
-  scientificToDecimal,
-  getAllLaunchedTokens,
-  getTokenInfo,
-};
-
-// Tiny debug helper (you can run window.debugFetchTokens() in the console)
-;(window as any).debugFetchTokens = async () => {
-  const list = await getAllLaunchedTokens();
-  console.log('debugFetchTokens =>', list);
-  return list;
-};
