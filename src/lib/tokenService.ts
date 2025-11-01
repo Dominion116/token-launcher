@@ -71,7 +71,7 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
 
   // 2) Fallback: scan TokenLaunched events
   try {
-    const iface = new ethers.utils.Interface(TOKEN_LAUNCHER_CONTRACT.abi as any);
+    const iface = new ethers.utils.Interface(TOKEN_LAUNCHER_CONTRACT.[networkConfig.name as ]abi as any);
     const topic = iface.getEventTopic('TokenLaunched');
 
     const logs = await provider.getLogs({
