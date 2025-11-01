@@ -99,6 +99,13 @@ export const TOKEN_LAUNCHER_CONTRACT = {
         type: 'event',
       },
       {
+        inputs: [],
+        name: 'launchFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
         inputs: [{ internalType: 'address', name: 'tokenAddress', type: 'address' }],
         name: 'getTokenInfo',
         outputs: [
@@ -159,6 +166,13 @@ export const TOKEN_LAUNCHER_CONTRACT = {
         ],
         name: 'TokenLaunched',
         type: 'event',
+      },
+      {
+        inputs: [],
+        name: 'launchFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
       },
       {
         inputs: [{ internalType: 'address', name: 'tokenAddress', type: 'address' }],

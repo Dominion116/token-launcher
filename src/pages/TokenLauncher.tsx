@@ -9,13 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { ethers } from 'ethers';
-import { TOKEN_LAUNCHER_CONTRACT, getNetworkConfig } from '@/lib/config';
+import { TOKEN_LAUNCHER_CONTRACT, getNetworkConfigByChainId } from '@/lib/config';
 import { getAllLaunchedTokens, type TokenInfo } from '@/lib/tokenService';
 import { normalizeImageUrl, PLACEHOLDER_IMG } from '@/lib/media';
+import { useChainId } from 'wagmi';
 
 const TokenLauncher: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const chainId = useChainId(); // Fix: Get current chainId from wagmi
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
@@ -32,17 +34,20 @@ const TokenLauncher: React.FC = () => {
   const [launchedTokens, setLaunchedTokens] = useState<TokenInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fix: Reload tokens when chainId changes
   useEffect(() => {
     loadTokens();
-  }, []);
+  }, [chainId]);
 
-  // Fetch launched tokens based on the network you're connected to
+  // Fix: Fetch launched tokens based on the current connected network
   const loadTokens = async () => {
     setIsLoading(true);
     try {
-      const tokens = await getAllLaunchedTokens(); // Fetch tokens from the blockchain
+      const tokens = await getAllLaunchedTokens(chainId); // Fix: Pass chainId
       setLaunchedTokens(tokens);
+      console.log('[TokenLauncher] Loaded tokens:', tokens.length, 'for chainId:', chainId);
     } catch (error) {
+      console.error('[TokenLauncher] Failed to load tokens:', error);
       toast({
         title: 'Error',
         description: 'Failed to load tokens from blockchain',
@@ -75,14 +80,27 @@ const TokenLauncher: React.FC = () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const networkConfig = getNetworkConfig(true);
+      
+      // Fix: Get network config by chainId
+      const networkConfig = getNetworkConfigByChainId(chainId);
+      
+      if (!networkConfig) {
+        throw new Error('Unsupported network');
+      }
+      
+      const contractConfig = TOKEN_LAUNCHER_CONTRACT[networkConfig.name];
+      
+      if (!contractConfig) {
+        throw new Error('Contract not configured for this network');
+      }
+      
       const contract = new ethers.Contract(
-        TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address, // Access address based on current network
-        TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,    // Access ABI based on current network
+        contractConfig.address,
+        contractConfig.abi,
         signer
       );
 
-      const launchFee = await contract.launchFee();
+      const launchFee = await contract.launchFee; // It's a property, not a function
 
       const tx = await contract.launchToken(
         formData.name,
@@ -112,6 +130,7 @@ const TokenLauncher: React.FC = () => {
       });
       setAgreedToTerms(false);
     } catch (error: any) {
+      console.error('[TokenLauncher] Deployment failed:', error);
       toast({
         title: 'Deployment Failed',
         description: error?.message || 'Failed to deploy token',
@@ -155,6 +174,10 @@ const TokenLauncher: React.FC = () => {
   const handleTokenClick = (token: TokenInfo) => {
     navigate(`/token/${token.tokenAddress}`, { state: { token } });
   };
+
+  // Fix: Get current network config
+  const currentNetworkConfig = getNetworkConfigByChainId(chainId);
+  const networkName = currentNetworkConfig?.name === 'celoMainnet' ? 'Celo Mainnet' : 'Celo Alfajores';
 
   return (
     <div className="min-h-screen bg-background">
@@ -338,7 +361,7 @@ const TokenLauncher: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <CardTitle>Recently Launched Tokens</CardTitle>
-                    <CardDescription>Tokens created on {getNetworkConfig(true).name}</CardDescription>
+                    <CardDescription>Tokens created on {networkName}</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" onClick={loadTokens} disabled={isLoading}>
@@ -427,7 +450,7 @@ const TokenLauncher: React.FC = () => {
                                   })
                                 }
                               >
-                                <Button variant="outline" size="sm" className="h-7 text-xs">
+                                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
                                   <Copy className="h-3 w-3 mr-1" />
                                   {formatAddress(token.tokenAddress)}
                                 </Button>
@@ -438,8 +461,9 @@ const TokenLauncher: React.FC = () => {
                                 className="h-7 text-xs"
                                 onClick={e => {
                                   e.stopPropagation();
+                                  const explorerUrl = currentNetworkConfig?.explorerUrl || 'https://explorer.celo.org';
                                   window.open(
-                                    `${getNetworkConfig(true).explorerUrl}/address/${token.tokenAddress}`,
+                                    `${explorerUrl}/address/${token.tokenAddress}`,
                                     '_blank'
                                   );
                                 }}
