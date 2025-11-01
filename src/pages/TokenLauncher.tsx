@@ -17,7 +17,7 @@ import { useChainId } from 'wagmi';
 const TokenLauncher: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const chainId = useChainId(); // Fix: Get current chainId from wagmi
+  const chainId = useChainId(); // Fix: useChainId() takes no arguments
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
@@ -36,11 +36,15 @@ const TokenLauncher: React.FC = () => {
 
   // Fix: Reload tokens when chainId changes
   useEffect(() => {
-    loadTokens();
+    if (chainId) {
+      loadTokens();
+    }
   }, [chainId]);
 
   // Fix: Fetch launched tokens based on the current connected network
   const loadTokens = async () => {
+    if (!chainId) return;
+    
     setIsLoading(true);
     try {
       const tokens = await getAllLaunchedTokens(chainId); // Fix: Pass chainId
