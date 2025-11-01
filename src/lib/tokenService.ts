@@ -28,14 +28,24 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
     console.error('[tokens] provider not initialized for chain', getNetworkConfig(true).chainId);
     return [];
   }
+
   const networkConfig = getNetworkConfig(true);
+  
+  // Ensure correct type for contract access
+  const contractConfig = TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'];
+  
+  if (!contractConfig) {
+    console.error(`Contract configuration not found for network: ${networkConfig.name}`);
+    return [];
+  }
+
   const factory = new ethers.Contract(
-    TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
-    TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,
+    contractConfig.address,
+    contractConfig.abi,
     provider
   );
 
-  // 1) Try array + count
+  // 1) Try array + count method
   try {
     const totalBn: ethers.BigNumber = await factory.getTotalLaunchedTokens();
     const total = totalBn.toNumber();
@@ -71,11 +81,11 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
 
   // 2) Fallback: scan TokenLaunched events
   try {
-    const iface = new ethers.utils.Interface(TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi as any);
+    const iface = new ethers.utils.Interface(contractConfig.abi as any);
     const topic = iface.getEventTopic('TokenLaunched');
 
     const logs = await provider.getLogs({
-      address: TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
+      address: contractConfig.address,
       fromBlock: FACTORY_DEPLOY_BLOCK ?? 0,
       toBlock: 'latest',
       topics: [topic],
@@ -112,9 +122,16 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
     if (!provider) throw new Error('Provider not initialized');
 
     const networkConfig = getNetworkConfig(true);
+    const contractConfig = TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'];
+
+    if (!contractConfig) {
+      console.error(`Contract configuration not found for network: ${networkConfig.name}`);
+      return null;
+    }
+
     const factory = new ethers.Contract(
-      TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].address,
-      TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'].abi,
+      contractConfig.address,
+      contractConfig.abi,
       provider
     );
 
@@ -134,3 +151,73 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
     return null;
   }
 }
+
+export const formatTokenAmount = (amount: string | number, precision = 18): string => {
+  if (typeof amount !== 'number' && typeof amount !== 'string') return '0';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (Number.isNaN(num)) return '0';
+  try {
+    const s = num.toString();
+    if (!s.includes('.')) return s;
+    const decimals = s.split('.')?.[1]?.length || 0;
+    if (decimals > precision) {
+      if (precision === undefined || Number.isNaN(precision)) {
+        return (Math.floor(num * 1e18) / 1e18).toFixed(18).replace(/\.?0+$/, '');
+      }
+      return (Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision)).toFixed(precision);
+    }
+    return s;
+  } catch {
+    return '0';
+  }
+};
+
+export const scientificToDecimal = (num: string | number): string => {
+  const s = typeof num === 'number' ? num.toString() : num;
+  if (!/e/i.test(s)) return s;
+  const [base, exponent] = s.split(/e/i);
+  if (exponent) {
+    const e = parseInt(exponent, 10);
+    if (e < 0) return '0.' + '0'.repeat(Math.abs(e) - 1) + base.replace('.', '');
+  }
+  return s;
+};
+
+export const getCeloBalance = async (walletAddress: string, chainId?: number): Promise<string> => {
+  try {
+    const current = getNetworkConfig();
+    const target = chainId || current.chainId;
+    const provider = providers[target];
+    if (!provider) return '0';
+    if (!isValidAddress(walletAddress)) return '0';
+    const balance = await provider.getBalance(walletAddress);
+    return ethers.utils.formatEther(balance);
+  } catch {
+    return '0';
+  }
+};
+
+export const isValidAddress = (address: string): boolean => {
+  try {
+    return ethers.utils.isAddress(address);
+  } catch {
+    return false;
+  }
+};
+
+export default {
+  providers,
+  isValidAddress,
+  getCeloBalance,
+  formatTokenAmount,
+  scientificToDecimal,
+  getAllLaunchedTokens,
+  getTokenInfo,
+};
+
+// Tiny debug helper (you can run window.debugFetchTokens() in the console)
+;(window as any).debugFetchTokens = async () => {
+  const list = await getAllLaunchedTokens();
+  console.log('debugFetchTokens =>', list);
+  return list;
+};
