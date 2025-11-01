@@ -7,7 +7,7 @@ import {
 
 // One provider per configured chain
 export const providers: Record<number, ethers.providers.JsonRpcProvider> = {};
-const cfg = getNetworkConfig(true); // Ensure it's fetching the correct network configuration
+const cfg = getNetworkConfig(true); // Pass `true` for Celo Mainnet, `false` for Alfajores testnet
 providers[cfg.chainId] = new ethers.providers.JsonRpcProvider(cfg.rpcUrl);
 
 // Types
@@ -23,13 +23,13 @@ export interface TokenInfo {
 }
 
 export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
-  const provider = providers[getNetworkConfig(true).chainId];
+  const provider = providers[getNetworkConfig(true).chainId]; // Pass `true` to get Celo Mainnet config
   if (!provider) {
     console.error('[tokens] provider not initialized for chain', getNetworkConfig(true).chainId);
     return [];
   }
 
-  const networkConfig = getNetworkConfig(true);
+  const networkConfig = getNetworkConfig(true); // Again, pass `true` to get Celo Mainnet config
   
   // Ensure correct type for contract access
   const contractConfig = TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'];
@@ -118,10 +118,10 @@ export async function getAllLaunchedTokens(): Promise<TokenInfo[]> {
 
 export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | null> {
   try {
-    const provider = providers[getNetworkConfig(true).chainId];
+    const provider = providers[getNetworkConfig(true).chainId]; // Pass `true` to get Celo Mainnet config
     if (!provider) throw new Error('Provider not initialized');
 
-    const networkConfig = getNetworkConfig(true);
+    const networkConfig = getNetworkConfig(true); // Pass `true` to get Celo Mainnet config
     const contractConfig = TOKEN_LAUNCHER_CONTRACT[networkConfig.name as 'celoMainnet' | 'celoAlfajores'];
 
     if (!contractConfig) {
@@ -152,6 +152,7 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo | nu
   }
 }
 
+// Helper functions for formatting
 export const formatTokenAmount = (amount: string | number, precision = 18): string => {
   if (typeof amount !== 'number' && typeof amount !== 'string') return '0';
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -185,7 +186,7 @@ export const scientificToDecimal = (num: string | number): string => {
 
 export const getCeloBalance = async (walletAddress: string, chainId?: number): Promise<string> => {
   try {
-    const current = getNetworkConfig();
+    const current = getNetworkConfig(true); // FIX: Added required argument (true for mainnet)
     const target = chainId || current.chainId;
     const provider = providers[target];
     if (!provider) return '0';
@@ -215,7 +216,7 @@ export default {
   getTokenInfo,
 };
 
-// Tiny debug helper (you can run window.debugFetchTokens() in the console)
+// Debug helper
 ;(window as any).debugFetchTokens = async () => {
   const list = await getAllLaunchedTokens();
   console.log('debugFetchTokens =>', list);
