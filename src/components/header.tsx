@@ -5,7 +5,7 @@ import { CheckCircle, AlertCircle, Moon, Sun, Menu, X, Copy } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/components/ui/use-mobile'
 import CopyToClipboard from 'react-copy-to-clipboard'
-import { useAccount, useBalance, useChainId, useDisconnect, useSwitchChain } from 'wagmi'
+import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi'
 import { networks } from '@/lib/chains'
 import { useToast } from '@/hooks/use-toast'
 
@@ -20,11 +20,10 @@ const Header: React.FC<{ darkMode: boolean; toggleDarkMode: () => void }> = ({
 
   const isLandingPage = location.pathname === '/'
 
-  const { address, isConnected } = useAccount()
-  const chainId = useChainId()
+  const { address, isConnected, chain } = useAccount() // Fix: Get chain from useAccount
+  const chainId = chain?.id // Fix: Extract chainId from chain
   const { data: balanceData, isLoading: isLoadingBalance } = useBalance({
     address,
-    chainId,
   })
   const { disconnect } = useDisconnect()
   const { chains, switchChain, isPending: switching } = useSwitchChain()

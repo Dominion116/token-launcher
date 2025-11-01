@@ -12,12 +12,13 @@ import { ethers } from 'ethers';
 import { TOKEN_LAUNCHER_CONTRACT, getNetworkConfigByChainId } from '@/lib/config';
 import { getAllLaunchedTokens, type TokenInfo } from '@/lib/tokenService';
 import { normalizeImageUrl, PLACEHOLDER_IMG } from '@/lib/media';
-import { useChainId } from 'wagmi';
+import { useAccount } from 'wagmi';
 
 const TokenLauncher: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const chainId = useChainId(); // Fix: useChainId() takes no arguments
+  const { chain } = useAccount();
+  const chainId = chain?.id;
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
@@ -79,6 +80,15 @@ const TokenLauncher: React.FC = () => {
       return;
     }
 
+    if (!chainId) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsDeploying(true);
 
     try {
@@ -104,7 +114,7 @@ const TokenLauncher: React.FC = () => {
         signer
       );
 
-      const launchFee = await contract.launchFee; // It's a property, not a function
+      const launchFee = await contract.launchFee(); // Call it as a function
 
       const tx = await contract.launchToken(
         formData.name,
@@ -180,7 +190,7 @@ const TokenLauncher: React.FC = () => {
   };
 
   // Fix: Get current network config
-  const currentNetworkConfig = getNetworkConfigByChainId(chainId);
+  const currentNetworkConfig = chainId ? getNetworkConfigByChainId(chainId) : null;
   const networkName = currentNetworkConfig?.name === 'celoMainnet' ? 'Celo Mainnet' : 'Celo Alfajores';
 
   return (
